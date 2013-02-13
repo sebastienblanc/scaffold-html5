@@ -16,19 +16,19 @@ public class Html5ScaffoldTest extends AbstractShellTest
    @Test
    public void testDefaultCommand() throws Exception
    {
-      getShell().execute("htm5scaffod");
+      getShell().execute("html5");
    }
 
    @Test
    public void testCommand() throws Exception
    {
-      getShell().execute("htm5scaffod command");
+      getShell().execute("html5 command");
    }
 
    @Test
    public void testPrompt() throws Exception
    {
       queueInputLines("y");
-      getShell().execute("htm5scaffod prompt foo bar");
+      getShell().execute("html5 prompt foo bar");
    }
 }

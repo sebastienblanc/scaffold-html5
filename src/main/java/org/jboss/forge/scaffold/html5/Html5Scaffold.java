@@ -153,6 +153,19 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
         }
 
         try {
+            Template dataServiceTemplate = config.getTemplate("scripts/dataService.js.ftl");
+            Writer contents = new StringWriter();
+            dataServiceTemplate.process(root, contents);
+            contents.flush();
+            result.add(ScaffoldUtil.createOrOverwrite(prompt, web.getWebResource("scripts/services/dataService.js"), contents.toString(),
+                    overwrite));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (TemplateException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
             Template controllerTemplate = config.getTemplate("scripts/filters.js.ftl");
             Writer contents = new StringWriter();
             controllerTemplate.process(root, contents);
