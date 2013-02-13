@@ -96,8 +96,13 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
                 getClass().getResourceAsStream("/scaffold/angularjs/styles/bootstrap-responsive.css"), overwrite));
         result.add(ScaffoldUtil.createOrOverwrite(this.prompt, web.getWebResource("/scripts/vendor/angular.js"), getClass()
                 .getResourceAsStream("/scaffold/angularjs/scripts/vendor/angular.js"), overwrite));
-        result.add(ScaffoldUtil.createOrOverwrite(this.prompt, web.getWebResource("/scripts/vendor/angular-resource.js"),
-                getClass().getResourceAsStream("/scaffold/angularjs/scripts/vendor/angular-resource.js"), overwrite));
+
+        result.add(ScaffoldUtil.createOrOverwrite(this.prompt, web.getWebResource("/scripts/vendor/aerogear.js"),
+                getClass().getResourceAsStream("/scaffold/angularjs/scripts/vendor/aerogear.js"), overwrite));
+
+        result.add(ScaffoldUtil.createOrOverwrite(this.prompt, web.getWebResource("/scripts/vendor/jquery.min.js"),
+                getClass().getResourceAsStream("/scaffold/angularjs/scripts/vendor/jquery.min.js"), overwrite));
+
         result.add(ScaffoldUtil.createOrOverwrite(this.prompt, web.getWebResource("/images/forge-logo.png"), getClass()
                 .getResourceAsStream("/scaffold/angularjs/images/forge-logo.png"), overwrite));
         return result;

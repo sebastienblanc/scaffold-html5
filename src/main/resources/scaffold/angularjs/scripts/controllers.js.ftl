@@ -78,14 +78,15 @@ function Search${entityName}Controller($scope,$filter,$http,${entityName}Resourc
 	$scope.performSearch();
 };
 
-function New${entityName}Controller($scope,$location,${entityName}Resource
+function New${entityName}Controller($scope,$location,dataService,${entityName}Resource
 <#list properties as property>
 <#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
 , ${property.simpleType}Resource
 </#if>
 </#list>
 ) {
-	$scope.disabled = false;
+    var ${entityName?lower_case}Pipe = dataService.${entityName?lower_case}Pipe;
+    $scope.disabled = false;
 	
 	<#list properties as property>
 	<#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
@@ -95,15 +96,7 @@ function New${entityName}Controller($scope,$location,${entityName}Resource
     </#if>
     </#list>
 
-	$scope.save = function() {
-		${entityName}Resource.save($scope.${entityName?lower_case}, function(${entityName?lower_case},responseHeaders){
-			// Get the Location header and parse it.
-			var locationHeader = responseHeaders('Location');
-			var fragments = locationHeader.split('/');
-			var id = fragments[fragments.length -1];
-			$location.path('/${entityName}s/edit/' + id);
-		});
-	};
+    ${entityName?lower_case}Pipe.save($scope.${entityName?lower_case});
 	
     $scope.cancel = function() {
         $location.path("/${entityName}s");

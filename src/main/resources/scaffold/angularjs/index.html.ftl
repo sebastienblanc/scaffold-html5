@@ -7,9 +7,12 @@
     <link href="styles/bootstrap.css" rel="stylesheet" media="screen">
     <link href="styles/main.css" rel="stylesheet" media="screen">
     <link href="styles/bootstrap-responsive.css" rel="stylesheet" media="screen">
+    <script src="scripts/vendor/jquery.min.js"></script>
+    <script src="scripts/vendor/aerogear.js"></script>
 	<script src="scripts/vendor/angular.js"></script>
 	<script src="scripts/vendor/angular-resource.js"></script>
 	<script src="scripts/app.js"></script>
+    <script src="scripts/services/dataService.js"></script>
 	<#list entityNames as entityName>
     <script src="${entityName}Controllers.js"></script>
     </#list>
