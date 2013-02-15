@@ -301,19 +301,6 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
             throw new RuntimeException(e);
         }
 
-        try {
-            Template indexTemplate = config.getTemplate("scripts/entityModule.js.ftl");
-            Writer out = new StringWriter();
-            indexTemplate.process(root, out);
-            out.flush();
-            result.add(ScaffoldUtil.createOrOverwrite(prompt,
-                    web.getWebResource("/scripts/" + entity.getName() + "/" + entity.getName() + ".js"), out.toString(),
-                    overwrite));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (TemplateException e) {
-            throw new RuntimeException(e);
-        }
         generateIndex(targetDir, template, overwrite);
         return result;
     }

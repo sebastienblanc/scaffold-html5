@@ -1,25 +1,8 @@
-<h2>Search for ${entityName}s</h2>
+<h2>${entityName}s List</h2>
 <form id="${entityName}Search" class="form-horizontal">
-    <#list properties as property>
-    <div class="control-group">
-        <#if (property.hidden!"false") != "true">
-        <label for="${property.name}" class="control-label">${property.name?cap_first}</label>
-        <div class="controls">
-            <#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
-            <select id="${property.name}" name="${property.name}" ng-model="search.${property.name}" ng-options="${property.name?substring(0, 1)} as ${property.name?substring(0, 1)}.id for ${property.name?substring(0, 1)} in ${property.name}List">
-                <option value="">Choose a ${property.name?cap_first}</option>
-            </select>
-            <#else>
-            <input id="${property.name}" name="${property.name}" type="text" ng-model="search.${property.name}" placeholder="Enter the ${entityName} ${property.name}"></input>
-            </#if>
-        </div>
-        </#if>
-    </div>
-    </#list>
     <div class="control-group">
         <div class="controls">
-            <a id="Search" name="Search" class="btn btn-primary" ng-click="performSearch()"><i class="icon-search icon-white"></i> Search</a>
-            <a id="Create" name="Create" class="btn" href="#/${entityName}s/new"><i class="icon-plus-sign"></i> Create New</a>
+           <a id="Create" name="Create" class="btn" href="#/${entityName}s/new"><i class="icon-plus-sign"></i> Create New ${entityName}</a>
         </div>
     </div>
 </form>

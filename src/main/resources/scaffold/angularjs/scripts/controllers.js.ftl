@@ -1,12 +1,6 @@
 'use strict';
 
-function Search${entityName}Controller($scope,$filter,$http,${entityName}Resource
-<#list properties as property>
-<#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
-,${property.simpleType}Resource
-</#if>
-</#list>
-) {
+function Search${entityName}Controller($scope,$filter,dataService) {
     $scope.filter = $filter;
 	$scope.search={};
 	$scope.currentPage = 0;
@@ -17,24 +11,34 @@ function Search${entityName}Controller($scope,$filter,$http,${entityName}Resourc
 		var result = Math.ceil($scope.searchResults.length/$scope.pageSize);
 		return (result == 0) ? 1 : result;
 	};
+    var ${entityName?uncap_first}Pipe = dataService.${entityName?uncap_first}Pipe;
+    var ${entityName?uncap_first}Store = dataService.${entityName?uncap_first}Store;
 	<#list properties as property>
 	<#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
-    $scope.${property.name}List = ${property.simpleType}Resource.queryAll();
+    var ${property.simpleType?uncap_first}Pipe = dataService.${property.simpleType?uncap_first}Pipe;
+    ${property.simpleType?uncap_first}Pipe.read({
+        success: function(data){
+            $scope.${property.name}List = data;
+            $scope.$apply();
+        }
+    });
     </#if>
     </#list>
 
 	$scope.performSearch = function() {
-		$scope.searchResults = ${entityName}Resource.queryAll(function(){
-            var max = $scope.numberOfPages();
-            $scope.pageRange = [];
-            for(var ctr=0;ctr<max;ctr++) {
-                $scope.pageRange.push(ctr);
+        ${entityName?uncap_first}Pipe.read({
+            complete: function(data){
+                ${entityName?uncap_first}Store.save(data,true);
+                $scope.searchResults = ${entityName?uncap_first}Store.read();
+                var max = $scope.numberOfPages();
+                $scope.pageRange = [];
+                for(var ctr=0;ctr<max;ctr++) {
+                    $scope.pageRange.push(ctr);
+                }
+                $scope.$apply();
             }
-		});
-		/*$http.post('rest/${entityName}s/search',$scope.search).success(function(data,status){
-			$scope.searchResults = data;
-		});*/
-	};
+        });
+    };
 	
 	$scope.previous = function() {
 	   if($scope.currentPage > 0) {
@@ -78,69 +82,85 @@ function Search${entityName}Controller($scope,$filter,$http,${entityName}Resourc
 	$scope.performSearch();
 };
 
-function New${entityName}Controller($scope,$location,dataService,${entityName}Resource
-<#list properties as property>
-<#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
-, ${property.simpleType}Resource
-</#if>
-</#list>
-) {
-    var ${entityName?lower_case}Pipe = dataService.${entityName?lower_case}Pipe;
+function New${entityName}Controller($scope,$location,dataService) {
+    var ${entityName?uncap_first}Pipe = dataService.${entityName?uncap_first}Pipe;
     $scope.disabled = false;
-	
-	<#list properties as property>
-	<#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
-	${property.simpleType}Resource.queryAll(function(data){
-        $scope.${property.name}List = angular.fromJson(JSON.stringify(data));
-    });
-    </#if>
+
+    <#list properties as property>
+        <#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
+        var ${property.simpleType?uncap_first}Pipe = dataService.${property.simpleType?uncap_first}Pipe;
+        ${property.simpleType?uncap_first}Pipe.read({
+            success: function(data){
+                $scope.${property.name}List = data;
+                $scope.$apply();
+            }
+        });
+        </#if>
     </#list>
 
-    ${entityName?lower_case}Pipe.save($scope.${entityName?lower_case});
+    $scope.save = function() {
+        ${entityName?uncap_first}Pipe.save($scope.${entityName?uncap_first},{
+            complete: function(data){
+                $location.path('/${entityName}s');
+                $scope.$apply();
+            }
+        });
+    };
 	
     $scope.cancel = function() {
         $location.path("/${entityName}s");
     };
 }
 
-function Edit${entityName}Controller($scope,$routeParams,$location,${entityName}Resource
-<#list properties as property>
-<#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
-, ${property.simpleType}Resource
-</#if>
-</#list>
-) {
+function Edit${entityName}Controller($scope,$routeParams,$location,dataService) {
 	var self = this;
 	$scope.disabled = false;
+    var ${entityName?uncap_first}Pipe = dataService.${entityName?uncap_first}Pipe;
+    <#list properties as property>
+        <#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
+    var ${property.simpleType?uncap_first}Pipe = dataService.${property.simpleType?uncap_first}Pipe;
+        </#if>
+    </#list>
 
 	$scope.get = function() {
-	    ${entityName}Resource.get({${entityName}Id:$routeParams.${entityName}Id}, function(data){
-            self.original = data;
-            $scope.${entityName?lower_case} = new ${entityName}Resource(self.original);
-            <#list properties as property>
-            <#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
-            ${property.simpleType}Resource.queryAll(function(data) {
-                $scope.${property.name}List = data;
-                angular.forEach($scope.${property.name}List, function(datum){
-                    if(angular.equals(datum,$scope.${entityName?lower_case}.${property.name})) {
-                        $scope.${entityName?lower_case}.${property.name} = datum;
-                        self.original.${property.name} = datum;
+        ${entityName?uncap_first}Pipe.read({
+            id: $routeParams.${entityName}Id,
+            success: function(data){
+                self.original = data;
+                $scope.${entityName?uncap_first} = JSON.parse(JSON.stringify(data));
+                <#list properties as property>
+                    <#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">
+                 ${property.simpleType?uncap_first}Pipe.read({
+                    success: function(data){
+                        $scope.${property.name}List = data;
+                        angular.forEach($scope.${property.name}List, function(datum){
+                        if(angular.equals(datum,$scope.${entityName?uncap_first}.${property.name})) {
+                            $scope.${entityName?uncap_first}.${property.name} = datum;
+                            self.original.${property.name} = datum;
+                        }
+                        });
+                        $scope.$apply();
                     }
                 });
-            });
-            </#if>
-            </#list>
+                    </#if>
+                </#list>
+
+                $scope.$apply();
+            }
         });
-	};
+    };
 
 	$scope.isClean = function() {
-		return angular.equals(self.original, $scope.${entityName?lower_case});
+		return angular.equals(self.original, $scope.${entityName?uncap_first});
 	};
 
 	$scope.save = function() {
-		$scope.${entityName?lower_case}.$update(function(){
-            $scope.get();
-		});
+        ${entityName?uncap_first}Pipe.save($scope.${entityName?uncap_first},{
+            complete: function(data){
+                $location.path('/${entityName}s');
+                $scope.$apply();
+            }
+        });
 	};
 
 	$scope.cancel = function() {
@@ -148,9 +168,12 @@ function Edit${entityName}Controller($scope,$routeParams,$location,${entityName}
 	};
 
 	$scope.remove = function() {
-		$scope.${entityName?lower_case}.$remove(function() {
-			$location.path("/${entityName}s");
-		});
+        ${entityName?uncap_first}Pipe.remove($scope.${entityName?uncap_first},{
+            success: function(data){
+                $location.path('/${entityName}s');
+                $scope.$apply();
+            }
+        });
 	};
 	
 	$scope.get();

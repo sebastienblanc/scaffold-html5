@@ -1,10 +1,6 @@
 'use strict';
 
-var ${project.projectName} = angular.module('${project.projectName}', ['${project.projectName}.filters'
-<#list entityNames as entityName>
-,'${entityName}'
-</#list>
-])
+var ${project.projectName} = angular.module('${project.projectName}', ['${project.projectName}.filters'])
   .config(['$routeProvider', function($routeProvider) {
     $routeProvider
       <#list entityNames as entityName>
