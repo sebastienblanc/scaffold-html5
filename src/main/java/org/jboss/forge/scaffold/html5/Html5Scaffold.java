@@ -54,7 +54,7 @@ import freemarker.template.TemplateException;
 /**
  *
  */
-@Alias("aerogear")
+@Alias("html5-aerogear")
 @Help("HTML5 scaffolding")
 @RequiresFacet({ WebResourceFacet.class, DependencyFacet.class, PersistenceFacet.class, EJBFacet.class, CDIFacet.class })
 public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
