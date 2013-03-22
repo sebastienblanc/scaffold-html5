@@ -27,7 +27,7 @@ function Search${entityName}Controller($scope,$filter,dataService) {
 
 	$scope.performSearch = function() {
         ${entityName?uncap_first}Pipe.read({
-            complete: function(data){
+            success: function(data){
                 ${entityName?uncap_first}Store.save(data,true);
                 $scope.searchResults = ${entityName?uncap_first}Store.read();
                 var max = $scope.numberOfPages();
@@ -100,7 +100,7 @@ function New${entityName}Controller($scope,$location,dataService) {
 
     $scope.save = function() {
         ${entityName?uncap_first}Pipe.save($scope.${entityName?uncap_first},{
-            complete: function(data){
+            sucess: function(data){
                 $location.path('/${entityName}s');
                 $scope.$apply();
             }
@@ -126,7 +126,7 @@ function Edit${entityName}Controller($scope,$routeParams,$location,dataService) 
         ${entityName?uncap_first}Pipe.read({
             id: $routeParams.${entityName}Id,
             success: function(data){
-                self.original = data;
+                self.original = data.entity;
                 $scope.${entityName?uncap_first} = JSON.parse(JSON.stringify(data));
                 <#list properties as property>
                     <#if (property["many-to-one"]!"false") == "true" || (property["one-to-one"]!"false") == "true">

@@ -13,13 +13,17 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.jboss.forge.parser.JavaParser;
 import org.jboss.forge.parser.java.Field;
 import org.jboss.forge.parser.java.JavaClass;
+import org.jboss.forge.project.dependencies.Dependency;
+import org.jboss.forge.project.dependencies.DependencyBuilder;
 import org.jboss.forge.project.facets.BaseFacet;
 import org.jboss.forge.project.facets.DependencyFacet;
 import org.jboss.forge.project.facets.JavaSourceFacet;
 import org.jboss.forge.project.facets.MetadataFacet;
 import org.jboss.forge.project.facets.WebResourceFacet;
+import org.jboss.forge.project.services.ResourceFactory;
 import org.jboss.forge.resources.FileResource;
 import org.jboss.forge.resources.Resource;
 import org.jboss.forge.resources.java.JavaResource;
@@ -61,15 +65,22 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
 
     protected ShellPrompt prompt;
 
+    private String packageName;
+
     @Inject
     public Html5Scaffold(final ShellPrompt prompt) {
+
         this.prompt = prompt;
     }
 
     @Override
     public boolean install() {
-        // TODO Add Maven artifacts to the project here. Required facet installation is already handled by the class-level
-        // @RequiresFacet annotation.
+        DependencyFacet dependencyFacet = project.getFacet(DependencyFacet.class);
+        Dependency agDep = DependencyBuilder.create()
+                .setGroupId("org.jboss.aerogear")
+                .setArtifactId("aerogear-controller")
+                .setVersion("1.0.0.CR1");
+        dependencyFacet.addDirectDependency(agDep);
         return true;
     }
 
@@ -117,7 +128,7 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
     @Override
     public List<Resource<?>> generateIndex(String targetDir, Resource<?> template, boolean overwrite) {
         Configuration config = new Configuration();
-        config.setClassForTemplateLoading(getClass(), "/scaffold/angularjs");
+        config.setClassForTemplateLoading(getClass(), "/scaffold");
         config.setObjectWrapper(new DefaultObjectWrapper());
 
         ArrayList<Resource<?>> result = new ArrayList<Resource<?>>();
@@ -131,9 +142,11 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
         root.put("entityNames", entityNames);
         MetadataFacet metadata = this.project.getFacet(MetadataFacet.class);
         root.put("project", metadata);
+        root.put("packageName",packageName.substring(0,packageName.lastIndexOf(".")));
+
 
         try {
-            Template indexTemplate = config.getTemplate("index.html.ftl");
+            Template indexTemplate = config.getTemplate("angularjs/index.html.ftl");
             Writer contents = new StringWriter();
             indexTemplate.process(root, contents);
             contents.flush();
@@ -145,7 +158,7 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
         }
 
         try {
-            Template appJsTemplate = config.getTemplate("scripts/app.js.ftl");
+            Template appJsTemplate = config.getTemplate("angularjs/scripts/app.js.ftl");
             Writer contents = new StringWriter();
             appJsTemplate.process(root, contents);
             contents.flush();
@@ -158,7 +171,7 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
         }
 
         try {
-            Template dataServiceTemplate = config.getTemplate("scripts/dataService.js.ftl");
+            Template dataServiceTemplate = config.getTemplate("angularjs/scripts/dataService.js.ftl");
             Writer contents = new StringWriter();
             dataServiceTemplate.process(root, contents);
             contents.flush();
@@ -170,8 +183,25 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
             throw new RuntimeException(e);
         }
 
+
+        JavaSourceFacet javaSourceFacet = this.project.getFacet(JavaSourceFacet.class);
+
         try {
-            Template controllerTemplate = config.getTemplate("scripts/filters.js.ftl");
+            Template controllerTemplate = config.getTemplate("route/Route.java.ftl");
+            Writer contents = new StringWriter();
+            controllerTemplate.process(root, contents);
+            contents.flush();
+            JavaClass resource = JavaParser.parse(JavaClass.class, contents.toString());
+            resource.setPackage(javaSourceFacet.getBasePackage());
+            javaSourceFacet.saveJavaSource(resource);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (TemplateException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            Template controllerTemplate = config.getTemplate("angularjs/scripts/filters.js.ftl");
             Writer contents = new StringWriter();
             controllerTemplate.process(root, contents);
             contents.flush();
@@ -199,7 +229,7 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
         // TODO: Provide a 'utility' class for allowing transliteration across language naming schemes
         // We need this to use contextual naming schemes instead of performing toLowerCase etc. in FTLs.
         root.put("entityName", entity.getName());
-        
+        packageName = entity.getPackage();
         ForgePropertyStyleConfig forgePropertyStyleConfig = new ForgePropertyStyleConfig();
         forgePropertyStyleConfig.setProject(project);
         BaseObjectInspectorConfig baseObjectInspectorConfig = new BaseObjectInspectorConfig();
@@ -333,5 +363,7 @@ public class Html5Scaffold extends BaseFacet implements ScaffoldProvider {
             throw new RuntimeException(fileEx);
         }
     }
+
+
 
 }
